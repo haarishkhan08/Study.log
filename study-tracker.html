@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>study.log — Day Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0f;--surface:#16161a;--card:#1e1e24;--border:#2a2a35;
+  --accent:#7c5cfc;--accent2:#fc5c7d;--green:#4ade80;--amber:#fbbf24;
+  --text:#f0f0f5;--muted:#888899;--font:'Syne',sans-serif;--mono:'Space Mono',monospace;
+}
+body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:100vh;padding:2rem 1rem}
+.app{max-width:700px;margin:0 auto}
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
+.title{font-size:26px;font-weight:800;letter-spacing:-0.5px}
+.title span{color:var(--accent)}
+.countdown-pill{background:var(--accent2);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;font-family:var(--mono);white-space:nowrap;align-self:flex-start}
+.countdown-pill.urgent{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.section-label{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:.75rem}
+.day-section{margin-bottom:1.5rem}
+.mood-row{display:flex;gap:8px;flex-wrap:wrap}
+.mood-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 14px;cursor:pointer;font-size:13px;font-family:var(--font);color:var(--muted);transition:.15s;display:flex;align-items:center;gap:6px}
+.mood-btn:hover{border-color:var(--accent);color:var(--text)}
+.mood-btn.active{border-color:var(--accent);background:rgba(124,92,252,.15);color:var(--text)}
+.mood-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.tasks-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:480px){.tasks-grid{grid-template-columns:1fr}}
+.task-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.task-card:hover{border-color:var(--accent)}
+.task-card.done{border-color:var(--green);background:rgba(74,222,128,.08)}
+.task-card.done .task-name{text-decoration:line-through;color:var(--muted)}
+.task-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.task-sub{font-size:11px;color:var(--muted)}
+.task-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px}
+.task-card.done .task-check{background:var(--green);border-color:var(--green);color:#0d0d0f}
+.bio-section{margin-bottom:1.5rem}
+.bio-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.bio-pct{font-family:var(--mono);font-size:13px;color:var(--accent2)}
+.progress-bar{height:8px;background:var(--card);border-radius:4px;overflow:hidden;margin-bottom:.5rem}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.4s}
+.bio-chapters{display:flex;flex-wrap:wrap;gap:6px;margin-top:.75rem}
+.chapter-pill{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:.15s;font-family:var(--mono)}
+.chapter-pill:hover{border-color:var(--accent2);color:var(--text)}
+.chapter-pill.done{background:rgba(252,92,125,.12);border-color:var(--accent2);color:var(--accent2)}
+.prog-section{margin-bottom:1.5rem}
+.lang-row{display:flex;flex-direction:column;gap:8px}
+.lang-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.lang-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.lang-name{font-size:13px;font-weight:700}
+.lang-pct{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.lang-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.lang-fill{height:100%;border-radius:2px;transition:.3s}
+.lang-controls{display:flex;align-items:center;gap:6px;margin-top:6px}
+.lang-btn{background:transparent;border:1px solid var(--border);border-radius:6px;width:24px;height:24px;color:var(--muted);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;font-family:var(--mono)}
+.lang-btn:hover{border-color:var(--accent);color:var(--accent)}
+.lang-add{display:flex;gap:6px;margin-top:8px}
+.lang-add input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:var(--font);font-size:13px;outline:none}
+.lang-add input:focus{border-color:var(--accent)}
+.lang-add button{background:var(--accent);border:none;border-radius:8px;padding:7px 14px;color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer}
+.note-area textarea{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:var(--font);font-size:13px;resize:vertical;min-height:70px;outline:none;line-height:1.6}
+.note-area textarea:focus{border-color:var(--accent)}
+.note-area textarea::placeholder{color:var(--muted)}
+.save-btn{margin-top:8px;width:100%;background:var(--accent);border:none;border-radius:10px;padding:10px;color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:.15s}
+.save-btn:hover{opacity:.9}
+.log-section{margin-bottom:1.5rem}
+.log-entry{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.log-date{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:70px;padding-top:2px}
+.log-body{flex:1}
+.log-mood{font-size:12px;font-weight:700;margin-bottom:2px}
+.log-note{font-size:12px;color:var(--muted);line-height:1.5}
+.log-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.log-tag{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:rgba(124,92,252,.15);color:var(--accent)}
+.empty-log{color:var(--muted);font-size:13px;padding:1rem 0}
+.tabs{display:flex;gap:4px;margin-bottom:1.25rem;background:var(--card);border-radius:10px;padding:4px}
+.tab{flex:1;padding:8px;border:none;background:transparent;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;border-radius:7px;transition:.15s}
+.tab.active{background:var(--accent);color:#fff}
+.streak-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem}
+.streak-day{width:28px;height:28px;border-radius:6px;font-size:9px;font-family:var(--mono);display:flex;align-items:center;justify-content:center;font-weight:700}
+.streak-day.good{background:rgba(74,222,128,.2);color:var(--green)}
+.streak-day.bad{background:rgba(252,92,125,.15);color:var(--accent2)}
+.streak-day.empty{background:var(--card);color:var(--muted)}
+.streak-day.today{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <div class="title">study<span>.</span>log</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="today-date"></div>
+    </div>
+    <div class="countdown-pill" id="bio-countdown">loading...</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('today')">Today</button>
+    <button class="tab" onclick="showTab('bio')">Bio Prep</button>
+    <button class="tab" onclick="showTab('coding')">Coding</button>
+    <button class="tab" onclick="showTab('history')">History</button>
+  </div>
+
+  <div id="tab-today">
+    <div class="day-section">
+      <div class="section-label">How was your day?</div>
+      <div class="mood-row">
+        <button class="mood-btn" onclick="setMood('great','#4ade80')" id="mood-great"><span class="mood-dot" style="background:#4ade80"></span>Great</button>
+        <button class="mood-btn" onclick="setMood('good','#7c5cfc')" id="mood-good"><span class="mood-dot" style="background:#7c5cfc"></span>Good</button>
+        <button class="mood-btn" onclick="setMood('okay','#fbbf24')" id="mood-okay"><span class="mood-dot" style="background:#fbbf24"></span>Okay</button>
+        <button class="mood-btn" onclick="setMood('bad','#fc5c7d')" id="mood-bad"><span class="mood-dot" style="background:#fc5c7d"></span>Bad</button>
+      </div>
+    </div>
+
+    <div class="day-section">
+      <div class="section-label">Daily Tasks</div>
+      <div class="tasks-grid" id="tasks-grid"></div>
+    </div>
+
+    <div class="day-section note-area">
+      <div class="section-label">Quick Note</div>
+      <textarea id="day-note" placeholder="What did you learn today? Any blockers?"></textarea>
+      <button class="save-btn" onclick="saveEntry()">Save Today's Entry</button>
+    </div>
+  </div>
+
+  <div id="tab-bio" style="display:none">
+    <div class="bio-section">
+      <div class="bio-header">
+        <div style="font-size:14px;font-weight:700">Biology Exam — March 27</div>
+        <div class="bio-pct" id="bio-pct">0%</div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="bio-bar" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:.75rem" id="bio-days-left"></div>
+      <div class="section-label">Chapters / Topics — tap to mark done</div>
+      <div class="bio-chapters" id="bio-chapters"></div>
+    </div>
+  </div>
+
+  <div id="tab-coding" style="display:none">
+    <div class="prog-section">
+      <div class="section-label">Languages & Progress</div>
+      <div class="lang-row" id="lang-list"></div>
+      <div class="lang-add">
+        <input type="text" id="new-lang" placeholder="Add a language (e.g. CSS)">
+        <button onclick="addLang()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-history" style="display:none">
+    <div class="log-section">
+      <div class="section-label" style="margin-bottom:1rem">Streak — last 14 days</div>
+      <div class="streak-row" id="streak-row"></div>
+      <div class="section-label">Past Entries</div>
+      <div id="log-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const EXAM = new Date('2026-03-27');
+const TODAY = new Date();
+TODAY.setHours(0,0,0,0);
+
+function fmtDate(d){return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
+function todayKey(){return TODAY.toISOString().split('T')[0]}
+
+document.getElementById('today-date').textContent = fmtDate(TODAY);
+
+function updateCountdown(){
+  const diff = Math.ceil((EXAM - TODAY)/(1000*60*60*24));
+  const el = document.getElementById('bio-countdown');
+  if(diff<=0){el.textContent='EXAM DAY!';return}
+  el.textContent = diff+' days to Bio exam';
+  if(diff<=5)el.classList.add('urgent');
+  document.getElementById('bio-days-left').textContent = diff+' days remaining to cover all topics';
+}
+updateCountdown();
+
+const DEFAULT_TASKS = [
+  {id:'bio',name:'Study Biology',sub:'Main priority'},
+  {id:'html',name:'Practice HTML',sub:'Coding session'},
+  {id:'notes',name:'Review Notes',sub:'Revise yesterday'},
+  {id:'exercise',name:'Exercise / Break',sub:'Stay fresh'},
+  {id:'read',name:'Read/Research',sub:'Extra learning'},
+  {id:'revision',name:'Quick Revision',sub:'10 min review'},
+];
+
+const BIO_CHAPTERS = [
+  'Cell Biology','Genetics','Evolution','Ecology',
+  'Human Physiology','Plant Biology','Microbiology',
+  'Biochemistry','Reproduction','Nervous System',
+  'Endocrine System','Immunity','Biotechnology','Biodiversity'
+];
+
+function getState(){
+  try{return JSON.parse(localStorage.getItem('studylog')||'{}')}catch{return{}}
+}
+function setState(s){localStorage.setItem('studylog',JSON.stringify(s))}
+
+let state = getState();
+if(!state.langs){state.langs=[{name:'HTML',pct:10,color:'#fc5c7d'},{name:'Biology',pct:5,color:'#4ade80'}]}
+if(!state.bioChapters){state.bioChapters={}}
+if(!state.entries){state.entries={}}
+
+let currentMood='';
+let currentTasks={};
+
+function setMood(m){
+  currentMood=m;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('mood-'+m).classList.add('active');
+}
+
+function renderTasks(){
+  const g=document.getElementById('tasks-grid');
+  const entry=state.entries[todayKey()]||{};
+  currentTasks={...(entry.tasks||{})};
+  g.innerHTML=DEFAULT_TASKS.map(t=>`
+    <div class="task-card${currentTasks[t.id]?' done':''}" onclick="toggleTask('${t.id}')" id="tc-${t.id}">
+      <div class="task-name">${t.name}</div>
+      <div class="task-sub">${t.sub}</div>
+      <div class="task-check">${currentTasks[t.id]?'✓':''}</div>
+    </div>`).join('');
+}
+
+function toggleTask(id){
+  currentTasks[id]=!currentTasks[id];
+  const card=document.getElementById('tc-'+id);
+  if(currentTasks[id]){card.classList.add('done');card.querySelector('.task-name').style.textDecoration='line-through';card.querySelector('.task-check').textContent='✓'}
+  else{card.classList.remove('done');card.querySelector('.task-name').style.textDecoration='';card.querySelector('.task-check').textContent=''}
+}
+
+function saveEntry(){
+  const note=document.getElementById('day-note').value;
+  state.entries[todayKey()]={mood:currentMood||'okay',tasks:{...currentTasks},note,total:DEFAULT_TASKS.length};
+  setState(state);
+  const btn=document.querySelector('.save-btn');
+  btn.textContent='Saved!';btn.style.background='var(--green)';
+  setTimeout(()=>{btn.textContent="Save Today's Entry";btn.style.background=''},2000);
+  renderHistory();
+}
+
+function renderBio(){
+  const ch=document.getElementById('bio-chapters');
+  ch.innerHTML=BIO_CHAPTERS.map(c=>`
+    <div class="chapter-pill${state.bioChapters[c]?' done':''}" onclick="toggleChapter('${c}')">${c}</div>`).join('');
+  const done=Object.values(state.bioChapters).filter(Boolean).length;
+  const pct=Math.round((done/BIO_CHAPTERS.length)*100);
+  document.getElementById('bio-pct').textContent=pct+'%';
+  document.getElementById('bio-bar').style.width=pct+'%';
+}
+
+function toggleChapter(c){
+  state.bioChapters[c]=!state.bioChapters[c];
+  setState(state);
+  renderBio();
+}
+
+const LANG_COLORS=['#7c5cfc','#fc5c7d','#4ade80','#fbbf24','#38bdf8','#fb923c'];
+function renderLangs(){
+  const list=document.getElementById('lang-list');
+  list.innerHTML=state.langs.map((l,i)=>`
+    <div class="lang-item">
+      <div class="lang-top">
+        <div class="lang-name">${l.name}</div>
+        <div class="lang-pct">${l.pct}%</div>
+      </div>
+      <div class="lang-bar"><div class="lang-fill" style="width:${l.pct}%;background:${l.color}"></div></div>
+      <div class="lang-controls">
+        <button class="lang-btn" onclick="adjustLang(${i},-10)">−</button>
+        <button class="lang-btn" onclick="adjustLang(${i},10)">+</button>
+        <span style="font-size:11px;color:var(--muted);margin-left:4px;font-family:var(--mono)">adjust progress</span>
+        <button class="lang-btn" onclick="removeLang(${i})" style="margin-left:auto;color:var(--accent2);border-color:var(--accent2)">×</button>
+      </div>
+    </div>`).join('');
+}
+
+function adjustLang(i,delta){
+  state.langs[i].pct=Math.max(0,Math.min(100,state.langs[i].pct+delta));
+  setState(state);renderLangs();
+}
+function removeLang(i){state.langs.splice(i,1);setState(state);renderLangs()}
+function addLang(){
+  const inp=document.getElementById('new-lang');
+  const name=inp.value.trim();
+  if(!name)return;
+  state.langs.push({name,pct:0,color:LANG_COLORS[state.langs.length%LANG_COLORS.length]});
+  setState(state);renderLangs();inp.value='';
+}
+
+function renderHistory(){
+  const list=document.getElementById('log-list');
+  const keys=Object.keys(state.entries).sort().reverse();
+  if(!keys.length){list.innerHTML='<div class="empty-log">No entries yet — save today\'s entry to start your log.</div>';return}
+  list.innerHTML=keys.slice(0,20).map(k=>{
+    const e=state.entries[k];
+    const moodColors={great:'#4ade80',good:'#7c5cfc',okay:'#fbbf24',bad:'#fc5c7d'};
+    const tasksDone=Object.values(e.tasks||{}).filter(Boolean).length;
+    const total=Object.keys(e.tasks||{}).length||DEFAULT_TASKS.length;
+    return `<div class="log-entry">
+      <div class="log-date">${k}</div>
+      <div class="log-body">
+        <div class="log-mood" style="color:${moodColors[e.mood]||'#888'}">${e.mood||'—'} day</div>
+        ${e.note?`<div class="log-note">${e.note}</div>`:''}
+        <div class="log-tags"><span class="log-tag">${tasksDone}/${total} tasks</span></div>
+      </div>
+    </div>`}).join('');
+}
+
+function renderStreak(){
+  const row=document.getElementById('streak-row');
+  let html='';
+  for(let i=13;i>=0;i--){
+    const d=new Date(TODAY);d.setDate(d.getDate()-i);
+    const k=d.toISOString().split('T')[0];
+    const entry=state.entries[k];
+    const isToday=i===0;
+    const label=d.toLocaleDateString('en-IN',{day:'numeric'});
+    let cls='empty';
+    if(entry){cls=(['great','good'].includes(entry.mood))?'good':'bad'}
+    html+=`<div class="streak-day ${cls}${isToday?' today':''}" title="${k}">${label}</div>`;
+  }
+  row.innerHTML=html;
+}
+
+function showTab(t){
+  ['today','bio','coding','history'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display=id===t?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach((btn,i)=>{
+    btn.classList.toggle('active',['today','bio','coding','history'][i]===t);
+  });
+  if(t==='history'){renderHistory();renderStreak()}
+}
+
+renderTasks();renderBio();renderLangs();
+const todayEntry=state.entries[todayKey()];
+if(todayEntry){
+  setMood(todayEntry.mood);
+  currentTasks={...todayEntry.tasks};
+  document.getElementById('day-note').value=todayEntry.note||'';
+  renderTasks();
+}
+</script>
+</body>
+</html>
