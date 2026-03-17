@@ -11,7 +11,7 @@
   --bg:#0d0d0f;--surface:#16161a;--card:#1e1e24;--border:#2a2a35;
   --accent:#7c5cfc;--accent2:#fc5c7d;--green:#4ade80;--amber:#fbbf24;
   --text:#f0f0f5;--muted:#888899;--font:'Syne',sans-serif;--mono:'Space Mono',monospace;
-}<button onclick="resetData()" style="
+}
   padding:10px 15px;
   background:red;
   color:white;
@@ -95,7 +95,16 @@ body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:1
 .streak-day.today{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
-<body>
+<body><button onclick="resetData()" style="
+  padding:10px 15px;
+  background:red;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+">
+  Reset Day
+</button>
 <div class="app">
   <div class="header">
     <div>
@@ -354,8 +363,6 @@ if(todayEntry){
   document.getElementById('day-note').value=todayEntry.note||'';
   renderTasks();
 }
-</script>
-</body><script>
 function resetData() {
   if (confirm("Are you sure you want to reset?")) {
     localStorage.clear();
