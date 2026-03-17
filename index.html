@@ -5,6 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>study.log — Day Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  .reset-btn{
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #ff4d4d, #ff0000);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 1000;
+  transition: 0.3s;
+}
+
+.reset-btn:hover{
+  transform: scale(1.05);
+}
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -86,14 +105,8 @@ body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:1
 .streak-day.today{outline:2px solid var(--accent);outline-offset:2px}
 </style>
 </head>
-<body><button onclick="resetData()" style="
-  padding:10px 15px;
-  background:red;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-">
+<body>
+ <button onclick="resetData()" class="reset-btn">
   Reset Day
 </button>
 <div class="app">
